@@ -27,5 +27,5 @@ RUN for i in `seq 0 9` ; do mkdir -p /mnt/lun$i ; done \
 COPY vdbench50407 /opt/vdbench
 
 WORKDIR /opt/vdbench
-
+EXPOSE 22
 CMD ["/bin/bash"]
