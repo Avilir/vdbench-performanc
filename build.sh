@@ -17,9 +17,9 @@
 Tag=$1
 Repo="quay.io/avili/vdbench"
 
-if [[ ${Tag} -eq "" ]] ; then
+if [[ ${Tag} == "" ]] ; then
 	echo "Error: you mast give the tag name for the build !"
 	exit 1
 fi
 
-echo podman build -t ${Repo}:${Tag} .
+podman build -t ${Repo}:${Tag} .
