@@ -1,31 +1,32 @@
-FROM centos:7
+FROM ubi8
 
-RUN yum update -y \
-    && yum install -y https://centos7.iuscommunity.org/ius-release.rpm \
-    && yum install -y java screen which openssh-server openssh-clients\
-    && yum install -y python36u python36u-libs python36u-devel python36u-pip \
-#    && yum install -y which gcc \
-#    && yum install -y openldap-devel \ 
-    && yum clean all
+LABEL maintainer.mail="alayani@redhat.com"
+LABEL maintainer.name="Avi Liani"
+LABEL version="1.0"
 
-# pipenv installation
-#RUN pip install pipenv
-#RUN ln -s /usr/bin/pip3 /bin/pip
-#RUN pip install --upgrade pip \
-#    && pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-#RUN rm /usr/bin/python
-## python must be pointing to python3.6
-RUN ln -s /usr/bin/python3.6 /usr/bin/python3 \
-    && ln -s /usr/bin/pip3.6 /usr/bin/pip3
+RUN dnf update -y
 
+# Python installation
+RUN dnf install -y python3 python3-pip
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# Java installation
+RUN dnf install -y java
+
+RUN dnf clean all
+
+# Python packages installation
 RUN pip3 install --upgrade pip
-RUN pip3 install XlsxWriter
+RUN ln -s /usr/bin/pip3 /usr/bin/pip
+RUN pip install --user XlsxWriter
+
+#    && pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
 # create and copy the vdbench to the conatiner
-RUN for i in `seq 0 9` ; do mkdir -p /mnt/lun$i ; done \
-    && mkdir /opt/vdbench
+RUN for i in `seq 0 9` ; do mkdir -p /mnt/lun$i ; done
+RUN  mkdir /opt/vdbench  /mnt/pvc
 COPY vdbench50407 /opt/vdbench
-
+COPY .bashrc /root
+USER root
 WORKDIR /opt/vdbench
-EXPOSE 22
 CMD ["/bin/bash"]
