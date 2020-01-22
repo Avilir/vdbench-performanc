@@ -23,9 +23,8 @@ VERSION = '0.1'
 PROG = os.path.basename(os.path.splitext(__file__)[0])
 
 # The Description of this script for the Usage message.
-description = """Running vdbench benchmark"""
+description = "Running vdbench benchmark"
 
-#base_dir = "../conf"
 base_dir = "/opt/vdbench"
 base_config = base_dir + "/conf"
 
@@ -54,7 +53,7 @@ def build_cmd_parameters():
         dest='type2run',
         metavar='TYPE',
         default='B',
-        help='the desirable volumes type to run against (B-block / F-files)')
+        help='the desirable volumes type to run against\n(B-block / F-files)')
 
     parser.add_option(
         '-n', '--volnums',
@@ -64,23 +63,6 @@ def build_cmd_parameters():
         default=1,
         help='number of volumes to run against')
 
-''' 
-    parsing the input parameters.
-    parameters order is mandatory :
-    First parameter is : pre-define workload (default
-    Second parameter is : Volume type (F / B)
-'''
-def validate_input():
-    global file_name
-    global parser
-
-    # check if no arguments was given.
-    if len(sys.argv) > 1:
-        file_name = sys.argv[1]
-    else:
-        print ("\nError: No input file !!!\n")
-        parser.parse_args(['--help'])
-        sys.exit(1)
 
 def vols_type():
     devs = None
@@ -99,7 +81,8 @@ def vols_type():
 
 def file_vols():
     devs = []
-    for line in os.popen('df -h | grep rbd 2>/dev/null').read().strip().split('\n'):
+    for line in os.popen(
+            'df -h | grep rbd 2>/dev/null').read().strip().split('\n'):
         devs.append(line.split()[-1])
     return devs
 
@@ -109,7 +92,8 @@ def block_vols():
 
 def get_dev_size(dev):
     dev = dev.strip()
-    for line in os.popen("df -h {} 2>/dev/null".format(dev)).read().strip().split('\n'):
+    for line in os.popen("df -h {} 2>/dev/null".format(dev)
+                         ).read().strip().split('\n'):
         if 'Size' not in line:
             return line.split()[1].replace('G','')
 
@@ -118,15 +102,13 @@ if __name__ == "__main__":
     # building the input parameters object.
     build_cmd_parameters()
 
-    # validating the input parameters
-    #validate_input()
-
     # Parse the command line parameters
     OPTIONS, args = parser.parse_args()
 
     # Verify that the predefine test file is exist. if not, exit with error.
     test2run = base_config + "/" + OPTIONS.test2run
 
+    # Verify the configuration file(s) to run
     if os.path.isdir((test2run)) is True:
         print("Going to run all tests at : {}".format(test2run))
     elif os.path.isfile(test2run) is not True:
@@ -147,7 +129,9 @@ if __name__ == "__main__":
 
     # verify that the system have the desirable volumes type 
     if vols_type() != OPTIONS.type2run.upper():
-        print("Error: volumes type ({}) is not present on the system!".format(OPTIONS.type2run))
+        print("Error: volumes type ({}) is not present on the system!".format(
+            OPTIONS.type2run.upper())
+        )
         sys.exit(1)
 
     if OPTIONS.type2run.upper() == "B":
@@ -179,8 +163,12 @@ if __name__ == "__main__":
     if OPTIONS.type2run.upper() == "B":
         counter = 0
         for dev in block_vols():
-            dev_size = os.popen('lsblk {} 2>/dev/null | grep disk'.format(dev)).read().strip().split()[3]
-            include_file.write("sd=sd{:02d},lun={},size={},openflags=o_direct\n".format(counter+1, dev, dev_size))
+            dev_size = os.popen('lsblk {} 2>/dev/null | grep disk'.format(dev)
+                                ).read().strip().split()[3]
+            include_file.write(
+                "sd=sd{:02d},lun={},size={},openflags=o_direct\n".format(
+                    counter+1, dev, dev_size)
+            )
             counter = counter + 1
             if counter == OPTIONS.vol2run:
                 break
@@ -200,8 +188,13 @@ if __name__ == "__main__":
                 files = 1
 
             print(f"filesize is {filesize}")
-            print("device name is : {}\ndevice size is : {}".format(dev,dev_size))
-            include_file.write("fsd=fsd{:02d},anchor=/mnt/lun{},depth=4,width=4,files={},size={}M\n".format(counter+1, counter, files, filesize))
+            print("device name is : {}\ndevice size is : {}".format(
+                dev,dev_size)
+            )
+            include_file.write(
+                "fsd=fsd{:02d},anchor=/mnt/lun{},depth=4,width=4,files={},size={}M\n".format(
+                    counter+1, counter, files, filesize)
+            )
             counter = counter + 1
             if counter == OPTIONS.vol2run:
                 break
@@ -215,10 +208,14 @@ if __name__ == "__main__":
             if test is not '':
                 t = test.split('/')[-1]
                 print("running : {}".format(test))
-                os.system("./bin/vdbench -f {}/{} -o output/{} > logs/{}.log".format(test2run,test, t, t))
+                os.system("./bin/vdbench -f {}/{} -o output/{} > logs/{}.log".format(
+                    test2run,test, t, t)
+                )
     elif os.path.isfile(test2run) is True:
         print("running the test : {}".format(test2run))
-        os.system("./bin/vdbench -f {} -o output/{} > logs/{}.log".format(test2run,test2run, test2run))
+        os.system("./bin/vdbench -f {} -o output/{} > logs/{}.log".format(
+            test2run,test2run, test2run)
+        )
 
     os.system("tar -cf Results.tar conf/* logs/* outputs/*")
     os.system("gzip Results.tar")
