@@ -23,7 +23,7 @@ cfg_file="/tmp/vdbench/vdbenchjob-test_defenition"
 echo "hd=default,vdbench=/opt/vdbench/bin,user=root,shell=vdbench" > ${inc_f}
 
 index=0
-# Add each host (IP) that will used inthe test to the include file
+# Add each host (IP) that will used in the test to the include file
 for host in `cat /tmp/host/hosts`
 do
   echo "hd=hd${index},system=${host}" >> ${inc_f}
@@ -34,7 +34,7 @@ done
 ${bdir}/bin/vdbench -f ${cfg_file} -o  ${bdir}/outputs/TestRun | tee ${bdir}/logs/TestRun.log
 
 # Generate the report
-${bdir}/scripts/make_report.py ${bdir}/logs/TestRun.log
+${bdir}/scripts/make_clean_report.py ${bdir}/logs/TestRun.log
 
 # Collect all outputs to tar.gz file
 tar -cf /tmp/Results.tar ${bdir}/outputs/* ${bdir}/logs/*
