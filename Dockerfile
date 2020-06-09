@@ -13,9 +13,15 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN dnf clean all
 
 # Python packages installation
-RUN pip3 install --user --upgrade pip
+RUN pip3 install --upgrade  pip
 RUN ln -s /usr/bin/pip3 /usr/bin/pip
-RUN pip install --user --upgrade-strategy=only-if-needed XlsxWriter
+#USER 1001010000
+#USER 1001
+
+COPY --chown=1001 requirements.txt /home/requirements.txt
+
+#RUN umask 022
+RUN pip install --upgrade-strategy=only-if-needed -r /home/requirements.txt
 
 RUN for i in `seq 0 9` ; do mkdir -p /mnt/lun$i ; done
 RUN  mkdir /opt/vdbench /opt/vdbench/bin /opt/vdbench/logs \
@@ -27,6 +33,5 @@ COPY conf /opt/vdbench/conf/
 
 COPY .bashrc /root
 
-USER root
 WORKDIR /opt/vdbench
 CMD ["/bin/bash"]
